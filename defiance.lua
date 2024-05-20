@@ -1,27 +1,41 @@
-function session_init(session)
+debug_skip_splash = false
+
+function session_init()
+	session = {}
 	session.level = 0
-	session.platform_speed = 2
+	session.platform_speed = 1.2
 	session.platform_offset = 0
 	session.ball_position = { 0, 256 - 12 }
 	session.ball_speed = 0
-	session.ball_impulse = -4
+	session.ball_impulse = -3.25
+	session.ball_booster_impulse = -5
 	session.ball_gravity = 9.81
+	session.tokens_left = 3
+	session.lives = 3
 end
 
 function clamp(value, min, max)
-	if ( value < min ) then
+	if value < min then
 		return min
-	elseif ( value > max ) then
+	elseif value > max then
 		return max
 	else
 		return value
 	end
 end
 
-function update_session(session, elapsed_time)
+function session_update()
+	local TILE_EMPTY = 0
+	local TILE_TOKEN = 3
+	local TILE_SHELF = 1
+	local TILE_PLATFORM = 5
+	local TILE_BOOSTER = 2
+
+	local elapsed_time = 1 / 60
+
 	-- platform
-	if ( btn(0) ) then session.platform_offset = session.platform_offset - session.platform_speed end
-	if ( btn(1) ) then session.platform_offset = session.platform_offset + session.platform_speed end
+	if btn(0) then session.platform_offset = session.platform_offset - session.platform_speed end
+	if btn(1) then session.platform_offset = session.platform_offset + session.platform_speed end
 	session.platform_offset = clamp( session.platform_offset, 4, 128 - 4 )
 
 	-- ball gravity
@@ -29,29 +43,37 @@ function update_session(session, elapsed_time)
 	session.ball_speed = session.ball_speed + session.ball_gravity * elapsed_time
 	session.ball_position[2] = session.ball_position[2] + session.ball_speed
 
-	-- ball collision
-	ground_cell = {
-		flr( session.ball_position[1] / 8 ),
-		flr( (session.ball_position[2] + 4) / 8 )
-	}
+	-- collisions
+	center_cell = { flr( session.ball_position[1] / 8 ), flr( session.ball_position[2] / 8 ) }
+	center_tile = mget( center_cell[1], center_cell[2] )
+	ground_cell = { flr( session.ball_position[1] / 8 ), flr( (session.ball_position[2] + 4) / 8 ) }
 	ground_tile = mget( ground_cell[1], ground_cell[2] )
 
-	if ( ground_tile == 1 or ground_tile == 5 ) then
-		session.ball_position[2] = ground_cell[2] * 8 - 4
-		session.ball_speed = session.ball_impulse
+	if center_tile == TILE_TOKEN then
+		session.tokens_left = session.tokens_left - 1
+		mset( center_cell[1], center_cell[2], TILE_EMPTY )
+	end
+
+	if session.ball_speed > 0 then
+		if ground_tile == TILE_SHELF or ground_tile == TILE_PLATFORM then
+			session.ball_position[2] = ground_cell[2] * 8 - 4
+			session.ball_speed = session.ball_impulse
+		elseif ground_tile == TILE_BOOSTER then
+			session.ball_position[2] = ground_cell[2] * 8 - 4
+			session.ball_speed = session.ball_booster_impulse
+		end
 	end
 end
 
-function _init()
-	session = {}
-	session_init(session)
+function create_caption(session)
+	caption = 'tokens '
+	if session.tokens_left < 10 then caption = caption .. ' ' .. tostr(session.tokens_left) else caption = caption .. tostr(session.tokens_left) end
+	caption = caption .. '               balls '
+	if session.lives < 10 then caption = caption .. ' ' .. tostr(session.lives) else caption = caption .. tostr(session.lives) end
+	return caption
 end
 
-function _update60()
-	update_session( session, 1 / 60 )
-end
-
-function _draw()
+function session_draw()
 	cls()
 	camera( 0, 128 )
 
@@ -65,4 +87,36 @@ function _draw()
 
 	-- ball
 	spr( 9, session.ball_position[1] - 4, session.ball_position[2] - 4 )
+
+	-- hud
+	camera( 0, 0 )
+	print( create_caption( session ), 7 )
+end
+
+function splash_init()
+end
+
+function splash_update()
+	if btn(4) or btn(5) then
+		session_init()
+		_update60 = session_update
+		_draw = session_draw
+		return
+	end
+end
+
+function splash_draw()
+	cls()
+	print( 'pico of defiance' )
+	print( 'press x or y or play' )
+end
+
+if debug_skip_splash then
+	_init = session_init
+	_update60 = session_update
+	_draw = session_draw
+else
+	_init = splash_init
+	_update60 = splash_update
+	_draw = splash_draw
 end
