@@ -30,6 +30,7 @@ function session_update()
 	local TILE_SHELF = 1
 	local TILE_PLATFORM = 5
 	local TILE_BOOSTER = 2
+	local TILE_SPIKES = 4
 
 	local elapsed_time = 1 / 60
 
@@ -63,6 +64,22 @@ function session_update()
 			session.ball_speed = session.ball_booster_impulse
 		end
 	end
+
+	-- success
+	if session.tokens_left == 0 then
+		success_init()
+		_update60 = success_update
+		_draw = success_draw
+		return
+	end
+
+	-- fail
+	if center_tile == TILE_SPIKES then
+		fail_init()
+		_update60 = fail_update
+		_draw = fail_draw
+		return
+	end
 end
 
 function create_caption(session)
@@ -93,11 +110,46 @@ function session_draw()
 	print( create_caption( session ), 7 )
 end
 
+function success_init()
+end
+
+function success_update()
+	if btnp(4) or btnp(5) then
+		splash_init()
+		_update60 = splash_update
+		_draw = splash_draw
+		return
+	end
+end
+
+function success_draw()
+	session_draw()
+	print( 'you collected all tokens!' )
+	print( 'press x or o to continue' )
+end
+
+function fail_init()
+end
+
+function fail_update()
+	if btnp(4) or btnp(5) then
+		session_init()
+		_update60 = session_update
+		_draw = session_draw
+	end
+end
+
+function fail_draw()
+	session_draw()
+	print( 'argh! you ended up on a spike.' )
+	print( 'press x or o to restart' )
+end
+
 function splash_init()
 end
 
 function splash_update()
-	if btn(4) or btn(5) then
+	if btnp(4) or btnp(5) then
 		session_init()
 		_update60 = session_update
 		_draw = session_draw
@@ -108,7 +160,7 @@ end
 function splash_draw()
 	cls()
 	print( 'pico of defiance' )
-	print( 'press x or y or play' )
+	print( 'press ❎ or 🅾️ to play' )
 end
 
 if debug_skip_splash then
