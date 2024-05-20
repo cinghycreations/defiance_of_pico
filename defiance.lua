@@ -20,14 +20,14 @@ end
 
 function update_session(session, elapsed_time)
 	-- platform
-	if ( btn(0) ) then session.platform_offset -= session.platform_speed end
-	if ( btn(1) ) then session.platform_offset += session.platform_speed end
+	if ( btn(0) ) then session.platform_offset = session.platform_offset - session.platform_speed end
+	if ( btn(1) ) then session.platform_offset = session.platform_offset + session.platform_speed end
 	session.platform_offset = clamp( session.platform_offset, 4, 128 - 4 )
 
 	-- ball gravity
 	session.ball_position[1] = session.platform_offset
-	session.ball_speed += session.ball_gravity * elapsed_time
-	session.ball_position[2] += session.ball_speed
+	session.ball_speed = session.ball_speed + session.ball_gravity * elapsed_time
+	session.ball_position[2] = session.ball_position[2] + session.ball_speed
 
 	-- ball collision
 	ground_cell = {
