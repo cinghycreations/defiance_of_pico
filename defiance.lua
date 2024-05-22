@@ -127,12 +127,12 @@ function session_update()
 	end
 end
 
+function format2(value)
+	if value < 10 then return ' ' .. tostr(value) else return tostr(value) end
+end
+
 function create_caption(session)
-	caption = 'crowns '
-	if session.crowns_left < 10 then caption = caption .. ' ' .. tostr(session.crowns_left) else caption = caption .. tostr(session.crowns_left) end
-	caption = caption .. '               balls '
-	if session.lives < 10 then caption = caption .. ' ' .. tostr(session.lives) else caption = caption .. tostr(session.lives) end
-	return caption
+	return 'level ' .. format2(session.level) .. '    crowns ' .. format2(session.crowns_left) .. '   balls ' .. format2(session.lives)
 end
 
 function session_draw()
@@ -177,8 +177,9 @@ end
 
 function success_draw()
 	session_draw()
-	print( 'you collected all crowns!' )
-	print( 'press ❎ or 🅾️ to proceeed' )
+	cursor( 0, 7 * 8 )
+	print( '    you collected all crowns!   ' )
+	print( '   press ❎ or 🅾️ to proceeed  ' )
 end
 
 function fail_init()
@@ -200,12 +201,13 @@ end
 
 function fail_draw()
 	session_draw()
-	print( 'argh! you ended up on a spike.' )
+	cursor( 0, 7 * 8 )
+	print( ' argh! you ended up on a spike. ' )
 	if session.lives > 0 then
-		print( 'press ❎ or 🅾️ to restart' )
+		print( '    press ❎ or 🅾️ to restart  ' )
 	else
-		print( 'no balls left...' )
-		print( 'press ❎ or 🅾️ to quit' )
+		print( '         no balls left...       ' )
+		print( '      press ❎ or 🅾️ to quit   ' )
 	end
 end
 
@@ -222,8 +224,9 @@ end
 
 function splash_draw()
 	cls()
-	print( 'pico of defiance' )
-	print( 'press ❎ or 🅾️ to play' )
+	cursor( 0, 7 * 8 )
+	print( '       pico of defiance         ' )
+	print( '    press ❎ or 🅾️ to play     ' )
 end
 
 function endgame_init()
