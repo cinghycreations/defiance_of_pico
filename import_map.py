@@ -1,9 +1,9 @@
 import json
 
 map_lines = []
-with open( 'levels.tmj', 'r' ) as mapfile:
-	levels = json.load( mapfile )
-	data = levels['layers'][0]['data']
+with open( 'map.tmj', 'r' ) as mapfile:
+	map_data = json.load( mapfile )
+	data = map_data['layers'][0]['data']
 	for i in range(64):
 		map_line = ''
 		for j in range(128):
