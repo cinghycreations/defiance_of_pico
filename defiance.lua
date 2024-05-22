@@ -1,17 +1,57 @@
 debug_skip_splash = false
 
-function session_init()
+areas = {
+	scratch = { 0, 0, 16, 32 },
+	background1 = { 16, 0, 16, 32 },
+	background2 = { 32, 0, 16, 32 },
+	splash = { 48, 0, 16, 16 },
+	levels = {
+		{ 64, 0, 16, 16 },
+		{ 64, 16, 16, 16 },
+		{ 80, 0, 16, 16 },
+		{ 80, 16, 16, 16 },
+		{ 96, 0, 16, 16 },
+		{ 96, 16, 16, 16 },
+		{ 112, 0, 16, 16 },
+		{ 112, 16, 16, 16 },
+		{ 0, 32, 16, 32 },
+		{ 16, 32, 16, 32 },
+		{ 32, 32, 16, 32 },
+		{ 48, 32, 16, 32 },
+		{ 64, 32, 16, 32 },
+		{ 80, 32, 16, 32 },
+		{ 96, 32, 16, 32 },
+		{ 112, 32, 16, 32 },
+	},
+}
+
+function session_init(level, lives)
 	session = {}
-	session.level = 0
+	session.level = level or 1
+	session.background = 0
 	session.platform_speed = 1.2
 	session.platform_offset = 0
-	session.ball_position = { 0, 256 - 12 }
+	session.ball_position = { 0, 32 - 12 }
 	session.ball_speed = 0
 	session.ball_impulse = -3.25
 	session.ball_booster_impulse = -5
 	session.ball_gravity = 9.81
 	session.tokens_left = 3
-	session.lives = 3
+	session.lives = lives or 3
+
+	for i = 0, areas.scratch[3] - 1 do
+		for j = 0, areas.scratch[4] - 1 do
+			mset( areas.scratch[1] + i, areas.scratch[2] + j, 0 )
+		end
+	end
+
+	bounds = areas.levels[session.level]
+	for i = 0, bounds[3] - 1 do
+		for j = 0, bounds[4] - 1 do
+			local tile = mget( bounds[1] + i, bounds[2] + j )
+			mset( areas.scratch[1] + i, areas.scratch[2] + ( areas.scratch[4] - bounds[4] ) + j, tile )
+		end
+	end
 end
 
 function clamp(value, min, max)
@@ -94,8 +134,11 @@ function session_draw()
 	cls()
 	camera( 0, 128 )
 
+	-- background
+	map( (session.background + 1) * 16, 0, 0, 0, 16, 32 )
+
 	-- map
-	map( session.level * 16, 0, 0, 0, 16, 32 )
+	map( 0, 0, 0, 0, 16, 32 )
 
 	-- platform
 	spr( 6, session.platform_offset - 12 + 0, 256 - 8 )
