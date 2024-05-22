@@ -1,3 +1,10 @@
+local TILE_EMPTY = 0
+local TILE_CROWN = 3
+local TILE_SHELF = 1
+local TILE_PLATFORM = 5
+local TILE_BOOSTER = 2
+local TILE_SPIKES = 4
+
 debug_skip_splash = false
 
 areas = {
@@ -8,6 +15,7 @@ areas = {
 	levels = {
 		{ 64, 0, 16, 16 },
 		{ 64, 16, 16, 16 },
+		--[[
 		{ 80, 0, 16, 16 },
 		{ 80, 16, 16, 16 },
 		{ 96, 0, 16, 16 },
@@ -22,6 +30,7 @@ areas = {
 		{ 80, 32, 16, 32 },
 		{ 96, 32, 16, 32 },
 		{ 112, 32, 16, 32 },
+		]]
 	},
 }
 
@@ -31,12 +40,12 @@ function session_init(level, lives)
 	session.background = 0
 	session.platform_speed = 1.2
 	session.platform_offset = 0
-	session.ball_position = { 0, 32 - 12 }
+	session.ball_position = { 0, 256 - 64 }
 	session.ball_speed = 0
 	session.ball_impulse = -3.25
 	session.ball_booster_impulse = -5
 	session.ball_gravity = 9.81
-	session.tokens_left = 3
+	session.crowns_left = 0
 	session.lives = lives or 3
 
 	for i = 0, areas.scratch[3] - 1 do
@@ -49,6 +58,9 @@ function session_init(level, lives)
 	for i = 0, bounds[3] - 1 do
 		for j = 0, bounds[4] - 1 do
 			local tile = mget( bounds[1] + i, bounds[2] + j )
+			if tile == TILE_CROWN then
+				session.crowns_left = session.crowns_left + 1
+			end
 			mset( areas.scratch[1] + i, areas.scratch[2] + ( areas.scratch[4] - bounds[4] ) + j, tile )
 		end
 	end
@@ -65,13 +77,6 @@ function clamp(value, min, max)
 end
 
 function session_update()
-	local TILE_EMPTY = 0
-	local TILE_TOKEN = 3
-	local TILE_SHELF = 1
-	local TILE_PLATFORM = 5
-	local TILE_BOOSTER = 2
-	local TILE_SPIKES = 4
-
 	local elapsed_time = 1 / 60
 
 	-- platform
@@ -90,8 +95,8 @@ function session_update()
 	ground_cell = { flr( session.ball_position[1] / 8 ), flr( (session.ball_position[2] + 4) / 8 ) }
 	ground_tile = mget( ground_cell[1], ground_cell[2] )
 
-	if center_tile == TILE_TOKEN then
-		session.tokens_left = session.tokens_left - 1
+	if center_tile == TILE_CROWN then
+		session.crowns_left = session.crowns_left - 1
 		mset( center_cell[1], center_cell[2], TILE_EMPTY )
 	end
 
@@ -106,7 +111,7 @@ function session_update()
 	end
 
 	-- success
-	if session.tokens_left == 0 then
+	if session.crowns_left == 0 then
 		success_init()
 		_update60 = success_update
 		_draw = success_draw
@@ -115,6 +120,7 @@ function session_update()
 
 	-- fail
 	if center_tile == TILE_SPIKES then
+		session.lives = session.lives - 1
 		fail_init()
 		_update60 = fail_update
 		_draw = fail_draw
@@ -123,8 +129,8 @@ function session_update()
 end
 
 function create_caption(session)
-	caption = 'tokens '
-	if session.tokens_left < 10 then caption = caption .. ' ' .. tostr(session.tokens_left) else caption = caption .. tostr(session.tokens_left) end
+	caption = 'crowns '
+	if session.crowns_left < 10 then caption = caption .. ' ' .. tostr(session.crowns_left) else caption = caption .. tostr(session.crowns_left) end
 	caption = caption .. '               balls '
 	if session.lives < 10 then caption = caption .. ' ' .. tostr(session.lives) else caption = caption .. tostr(session.lives) end
 	return caption
@@ -158,17 +164,22 @@ end
 
 function success_update()
 	if btnp(4) or btnp(5) then
-		splash_init()
-		_update60 = splash_update
-		_draw = splash_draw
-		return
+		if session.level + 1 > #areas.levels then
+			endgame_init()
+			_update60 = endgame_update
+			_draw = endgame_draw
+		else
+			session_init( session.level + 1 )
+			_update60 = session_update
+			_draw = session_draw
+		end
 	end
 end
 
 function success_draw()
 	session_draw()
-	print( 'you collected all tokens!' )
-	print( 'press x or o to continue' )
+	print( 'you collected all crowns!' )
+	print( 'press ❎ or 🅾️ to proceeed' )
 end
 
 function fail_init()
@@ -176,16 +187,27 @@ end
 
 function fail_update()
 	if btnp(4) or btnp(5) then
-		session_init()
-		_update60 = session_update
-		_draw = session_draw
+		if session.lives > 0 then
+			session_init( session.level, session.lives )
+			_update60 = session_update
+			_draw = session_draw
+		else
+			splash_init()
+			_update60 = splash_update
+			_draw = splash_draw
+		end
 	end
 end
 
 function fail_draw()
 	session_draw()
 	print( 'argh! you ended up on a spike.' )
-	print( 'press x or o to restart' )
+	if session.lives > 0 then
+		print( 'press ❎ or 🅾️ to restart' )
+	else
+		print( 'no balls left...' )
+		print( 'press ❎ or 🅾️ to quit' )
+	end
 end
 
 function splash_init()
@@ -196,7 +218,6 @@ function splash_update()
 		session_init()
 		_update60 = session_update
 		_draw = session_draw
-		return
 	end
 end
 
@@ -204,6 +225,22 @@ function splash_draw()
 	cls()
 	print( 'pico of defiance' )
 	print( 'press ❎ or 🅾️ to play' )
+end
+
+function endgame_init()
+end
+
+function endgame_update()
+	if btnp(4) or btnp(5) then
+		splash_init()
+		_update60 = splash_update
+		_draw = splash_draw
+	end
+end
+
+function endgame_draw()
+	cls()
+	print( '*** placeholder endgame ***' )
 end
 
 if debug_skip_splash then
