@@ -140,7 +140,9 @@ end
 
 function session_draw()
 	cls()
-	camera( 0, 128 )
+
+	camera_position = clamp( session.ball_position[2] - 16, 0, 128 )
+	camera( 0, camera_position )
 
 	-- background
 	map( (session.background + 1) * 16, 0, 0, 0, 16, 32 )
