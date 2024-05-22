@@ -5,7 +5,7 @@ local TILE_BOOSTER = 2
 local TILE_SPIKES = 4
 
 dbg = {
-	skip_splash = false,
+	start_level = nil,
 	no_hud = false,
 }
 
@@ -252,8 +252,8 @@ function endgame_draw()
 	print( '*** placeholder endgame ***' )
 end
 
-if dbg.skip_splash then
-	_init = session_init
+if dbg.start_level ~= nil then
+	_init = function() session_init( dbg.start_level ) end
 	_update60 = session_update
 	_draw = session_draw
 else
