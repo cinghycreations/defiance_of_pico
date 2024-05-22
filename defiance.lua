@@ -4,7 +4,10 @@ local TILE_SHELF = 1
 local TILE_BOOSTER = 2
 local TILE_SPIKES = 4
 
-debug_skip_splash = false
+dbg = {
+	skip_splash = false,
+	no_hud = false,
+}
 
 areas = {
 	scratch = { 0, 0, 16, 32 },
@@ -154,8 +157,10 @@ function session_draw()
 	spr( 9, session.ball_position[1] - 4, session.ball_position[2] - 4 )
 
 	-- hud
-	camera( 0, 0 )
-	print( create_caption( session ), 7 )
+	if not dbg.no_hud then
+		camera( 0, 0 )
+		print( create_caption( session ), 7 )
+	end
 end
 
 function success_init()
@@ -245,7 +250,7 @@ function endgame_draw()
 	print( '*** placeholder endgame ***' )
 end
 
-if debug_skip_splash then
+if dbg.skip_splash then
 	_init = session_init
 	_update60 = session_update
 	_draw = session_draw
