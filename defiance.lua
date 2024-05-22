@@ -1,7 +1,6 @@
 local TILE_EMPTY = 0
 local TILE_CROWN = 3
 local TILE_SHELF = 1
-local TILE_PLATFORM = 5
 local TILE_BOOSTER = 2
 local TILE_SPIKES = 4
 
@@ -101,7 +100,7 @@ function session_update()
 	end
 
 	if session.ball_speed > 0 then
-		if ground_tile == TILE_SHELF or ground_tile == TILE_PLATFORM then
+		if ground_tile == TILE_SHELF or ground_cell[2] == 31 then
 			session.ball_position[2] = ground_cell[2] * 8 - 4
 			session.ball_speed = session.ball_impulse
 		elseif ground_tile == TILE_BOOSTER then
