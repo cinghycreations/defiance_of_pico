@@ -13,8 +13,6 @@ dbg = {
 
 areas = {
 	scratch = { 0, 0, 16, 32 },
-	background1 = { 16, 0, 16, 32 },
-	background2 = { 32, 0, 16, 32 },
 	splash = { 48, 0, 16, 16 },
 	levels = {
 		[1] = { 64, 0, 16, 16 },
@@ -40,7 +38,6 @@ areas = {
 function session_init(level, lives)
 	session = {}
 	session.level = level or 1
-	session.background = 0
 	session.platform_speed = 1.2
 	session.platform_offset = 0
 	session.ball_position = { 0, 256 - 64 }
@@ -50,6 +47,12 @@ function session_init(level, lives)
 	session.ball_gravity = 9.81
 	session.crowns_left = 0
 	session.lives = lives or 3
+
+	if session.level <= 8 then
+		session.background = 1
+	else
+		session.background = 2
+	end
 
 	for i = 0, areas.scratch[3] - 1 do
 		for j = 0, areas.scratch[4] - 1 do
@@ -150,7 +153,7 @@ function session_draw()
 	camera( 0, camera_position )
 
 	-- background
-	map( (session.background + 1) * 16, 0, 0, 0, 16, 32 )
+	map( session.background * 16, 0, 0, 0, 16, 32 )
 
 	-- map
 	map( 0, 0, 0, 0, 16, 32 )
