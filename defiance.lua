@@ -3,6 +3,8 @@ local TILE_CROWN = 3
 local TILE_SHELF = 1
 local TILE_BOOSTER = 2
 local TILE_SPIKES = 4
+local LEVEL_TESTBED = 255
+local LEVEL_COUNT = 16
 
 dbg = {
 	start_level = nil,
@@ -15,22 +17,23 @@ areas = {
 	background2 = { 32, 0, 16, 32 },
 	splash = { 48, 0, 16, 16 },
 	levels = {
-		{ 64, 0, 16, 16 },
-		{ 64, 16, 16, 16 },
-		{ 80, 0, 16, 16 },
-		{ 80, 16, 16, 16 },
-		{ 96, 0, 16, 16 },
-		{ 96, 16, 16, 16 },
-		{ 112, 0, 16, 16 },
-		{ 112, 16, 16, 16 },
-		{ 0, 32, 16, 32 },
-		{ 16, 32, 16, 32 },
-		{ 32, 32, 16, 32 },
-		{ 48, 32, 16, 32 },
-		{ 64, 32, 16, 32 },
-		{ 80, 32, 16, 32 },
-		{ 96, 32, 16, 32 },
-		{ 112, 32, 16, 32 },
+		[1] = { 64, 0, 16, 16 },
+		[2] = { 64, 16, 16, 16 },
+		[3] = { 80, 0, 16, 16 },
+		[4] = { 80, 16, 16, 16 },
+		[5] = { 96, 0, 16, 16 },
+		[6] = { 96, 16, 16, 16 },
+		[7] = { 112, 0, 16, 16 },
+		[8] = { 112, 16, 16, 16 },
+		[9] = { 0, 32, 16, 32 },
+		[10] = { 16, 32, 16, 32 },
+		[11] = { 32, 32, 16, 32 },
+		[12] = { 48, 32, 16, 32 },
+		[13] = { 64, 32, 16, 32 },
+		[14] = { 80, 32, 16, 32 },
+		[15] = { 96, 32, 16, 32 },
+		[16] = { 112, 32, 16, 32 },
+		[LEVEL_TESTBED] = { 48, 16, 16, 16 },
 	},
 }
 
@@ -92,21 +95,25 @@ function session_update()
 	-- collisions
 	center_cell = { flr( session.ball_position[1] / 8 ), flr( session.ball_position[2] / 8 ) }
 	center_tile = mget( center_cell[1], center_cell[2] )
-	ground_cell = { flr( session.ball_position[1] / 8 ), flr( (session.ball_position[2] + 4) / 8 ) }
-	ground_tile = mget( ground_cell[1], ground_cell[2] )
 
 	if center_tile == TILE_CROWN then
 		session.crowns_left = session.crowns_left - 1
 		mset( center_cell[1], center_cell[2], TILE_EMPTY )
 	end
 
-	if session.ball_speed > 0 then
-		if ground_tile == TILE_SHELF or ground_cell[2] == 31 then
-			session.ball_position[2] = ground_cell[2] * 8 - 4
-			session.ball_speed = session.ball_impulse
-		elseif ground_tile == TILE_BOOSTER then
-			session.ball_position[2] = ground_cell[2] * 8 - 4
-			session.ball_speed = session.ball_booster_impulse
+	local ground_sample_offsets = { { -2, 4 }, { 0, 4 }, { 2, 4 } }
+	for key, value in pairs( ground_sample_offsets ) do
+		ground_cell = { flr( ( session.ball_position[1] + value[1] ) / 8 ), flr( ( session.ball_position[2] + value[2] ) / 8 ) }
+		ground_tile = mget( ground_cell[1], ground_cell[2] )
+
+		if session.ball_speed > 0 then
+			if ground_tile == TILE_SHELF or ground_cell[2] == 31 then
+				session.ball_position[2] = ground_cell[2] * 8 - 4
+				session.ball_speed = session.ball_impulse
+			elseif ground_tile == TILE_BOOSTER then
+				session.ball_position[2] = ground_cell[2] * 8 - 4
+				session.ball_speed = session.ball_booster_impulse
+			end
 		end
 	end
 
@@ -168,7 +175,11 @@ end
 
 function success_update()
 	if btnp(4) or btnp(5) then
-		if session.level + 1 > #areas.levels then
+		if session.level == LEVEL_TESTBED then
+			session_init( LEVEL_TESTBED, 99 )
+			_update60 = session_update
+			_draw = session_draw
+		elseif session.level + 1 > LEVEL_COUNT then
 			endgame_init()
 			_update60 = endgame_update
 			_draw = endgame_draw
@@ -251,7 +262,7 @@ function endgame_draw()
 end
 
 if dbg.start_level ~= nil then
-	_init = function() session_init( dbg.start_level ) end
+	_init = function() session_init( dbg.start_level, 99 ) end
 	_update60 = session_update
 	_draw = session_draw
 else
