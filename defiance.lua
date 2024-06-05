@@ -38,6 +38,7 @@ areas = {
 function session_init(level, lives)
 	session = {}
 	session.level = level or 1
+	session.camera_offset = 0
 	session.platform_speed = 1.2
 	session.platform_offset = 0
 	session.ball_position = { 0, 256 - 64 }
@@ -149,8 +150,13 @@ end
 function session_draw()
 	cls()
 
-	camera_position = clamp( session.ball_position[2] - 16, 0, 128 )
-	camera( 0, camera_position )
+	if session.ball_position[2] - 16 < session.camera_offset then
+		session.camera_offset = session.ball_position[2] - 16
+	elseif session.ball_position[2] + 16 > session.camera_offset + 128 then
+		session.camera_offset = session.ball_position[2] + 16 - 128
+	end
+	session.camera_offset = clamp( session.camera_offset, 0, 128 )
+	camera( 0, session.camera_offset )
 
 	-- background
 	map( session.background * 16, 0, 0, 0, 16, 32 )
