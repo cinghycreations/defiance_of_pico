@@ -35,7 +35,7 @@ areas = {
 	},
 }
 
-function session_init(level, lives)
+function session_init(level, tries)
 	session = {}
 	session.level = level or 1
 	session.camera_offset = 0
@@ -47,7 +47,7 @@ function session_init(level, lives)
 	session.ball_booster_impulse = -5
 	session.ball_gravity = 9.81
 	session.crowns_left = 0
-	session.lives = lives or 3
+	session.tries = tries or 1
 
 	if session.level <= 8 then
 		session.background = 1
@@ -131,7 +131,6 @@ function session_update()
 
 	-- fail
 	if center_tile == TILE_SPIKES then
-		session.lives = session.lives - 1
 		fail_init()
 		_update60 = fail_update
 		_draw = fail_draw
@@ -144,7 +143,7 @@ function format2(value)
 end
 
 function create_caption(session)
-	return 'level ' .. format2(session.level) .. '    crowns ' .. format2(session.crowns_left) .. '   balls ' .. format2(session.lives)
+	return 'level ' .. format2(session.level) .. '    crowns ' .. format2(session.crowns_left) .. '   tries ' .. format2(session.tries)
 end
 
 function session_draw()
@@ -211,16 +210,14 @@ function fail_init()
 end
 
 function fail_update()
-	if btnp(4) or btnp(5) then
-		if session.lives > 0 then
-			session_init( session.level, session.lives )
-			_update60 = session_update
-			_draw = session_draw
-		else
-			splash_init()
-			_update60 = splash_update
-			_draw = splash_draw
-		end
+	if btnp(4) then
+		session_init( session.level, session.tries + 1 )
+		_update60 = session_update
+		_draw = session_draw
+	elseif btnp(5) then
+		splash_init()
+		_update60 = splash_update
+		_draw = splash_draw
 	end
 end
 
@@ -228,12 +225,8 @@ function fail_draw()
 	session_draw()
 	cursor( 0, 7 * 8 )
 	print( ' argh! you ended up on a spike. ' )
-	if session.lives > 0 then
-		print( '    press ❎ or 🅾️ to restart  ' )
-	else
-		print( '         no balls left...       ' )
-		print( '      press ❎ or 🅾️ to quit   ' )
-	end
+	print( '       press ❎ to retry       ' )
+	print( '        press 🅾️ to quit       ' )
 end
 
 function splash_init()
