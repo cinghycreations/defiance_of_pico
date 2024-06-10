@@ -14,25 +14,6 @@ dbg = {
 areas = {
 	scratch = { 0, 0, 16, 32 },
 	splash = { 48, 0, 16, 16 },
-	levels = {
-		[1] = { 64, 0, 16, 16 },
-		[2] = { 64, 16, 16, 16 },
-		[3] = { 80, 0, 16, 16 },
-		[4] = { 80, 16, 16, 16 },
-		[5] = { 96, 0, 16, 16 },
-		[6] = { 96, 16, 16, 16 },
-		[7] = { 112, 0, 16, 16 },
-		[8] = { 112, 16, 16, 16 },
-		[9] = { 0, 32, 16, 32 },
-		[10] = { 16, 32, 16, 32 },
-		[11] = { 32, 32, 16, 32 },
-		[12] = { 48, 32, 16, 32 },
-		[13] = { 64, 32, 16, 32 },
-		[14] = { 80, 32, 16, 32 },
-		[15] = { 96, 32, 16, 32 },
-		[16] = { 112, 32, 16, 32 },
-		[LEVEL_TESTBED] = { 48, 16, 16, 16 },
-	},
 }
 
 function session_init(level, tries)
@@ -61,15 +42,15 @@ function session_init(level, tries)
 		end
 	end
 
-	bounds = areas.levels[session.level]
-	for i = 0, bounds[3] - 1 do
-		for j = 0, bounds[4] - 1 do
-			local tile = mget( bounds[1] + i, bounds[2] + j )
-			if tile == TILE_CROWN then
-				session.crowns_left = session.crowns_left + 1
-			end
-			mset( areas.scratch[1] + i, areas.scratch[2] + ( areas.scratch[4] - bounds[4] ) + j, tile )
+	for level_cell = 1, #levels[session.level] do
+		local x = levels[session.level][level_cell][1]
+		local y = levels[session.level][level_cell][2]
+		local tile = levels[session.level][level_cell][3]
+
+		if tile == TILE_CROWN then
+			session.crowns_left = session.crowns_left + 1
 		end
+		mset( areas.scratch[1] + x, areas.scratch[2] + y, tile )
 	end
 end
 
