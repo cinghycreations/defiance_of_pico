@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
 	toolLog->info("Lua path: {}", lua_path);
 
 	std::ofstream stream(lua_path);
-	stream << "local levels = {" << std::endl;
+	stream << "levels = {" << std::endl;
 
 	tson::Tileson tileson;
 	for (const std::filesystem::path& path : level_paths) {
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
 		for (const tson::Layer& layer : map->getLayers()) {
 			if (layer.getType() == tson::LayerType::TileLayer) {
 				for (const auto& cell : layer.getTileData()) {
-					stream << fmt::format("{{ {}, {}, {} }}, ", std::get<0>(cell.first), std::get<1>(cell.first), cell.second->getGid());
+					stream << fmt::format("{{ {}, {}, {} }}, ", std::get<0>(cell.first), std::get<1>(cell.first), cell.second->getGid() - 1);
 				}
 			}
 		}
