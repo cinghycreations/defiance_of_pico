@@ -4,7 +4,7 @@ map_lines = []
 with open( 'map.tmj', 'r' ) as mapfile:
 	map_data = json.load( mapfile )
 	data = map_data['layers'][0]['data']
-	for i in range(64):
+	for i in range(32):
 		map_line = ''
 		for j in range(128):
 			tile = data[ 128 * i + j ]
