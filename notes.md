@@ -12,9 +12,9 @@
 |08|6|Trampoline Elevated jump|1|
 |09|6|Trampoline Jump w/ Death Risk|1|
 |10|6|Trampoline Upward trajectory w/ Death Risk|1|
-|11|7|Trampoline Elevated jump w/ Death Risk||
-|12|7|Trampoline Jump w/ Repetition Risk||
-|13|7|Trampoline Leap of faith||
+|11|7|Trampoline Elevated jump w/ Death Risk|1|
+|12|7|Trampoline Jump w/ Repetition Risk|1|
+|13|7|Trampoline Leap of faith|1|
 |14|8|Downward trajectory w/ Death Risk|1|
 |15|8|Trampoline Very Long Jump|1|
 |16|8|Upward trajectory w/ Death Risk|1|
