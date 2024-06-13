@@ -19,6 +19,6 @@
 |15|8|Trampoline Very Long Jump|1|
 |16|8|Upward trajectory w/ Death Risk|1|
 |17|8|Very Long Jump|1|
-|18|9|Crawl|1|
-|19|10|Trampoline Crawl|1|
+|18|9|Climb|1|
+|19|10|Trampoline Climb|1|
 |20|F|Final|1|

@@ -184,7 +184,7 @@ function success_update()
 			session_init( LEVEL_TESTBED )
 			_update60 = session_update
 			_draw = session_draw
-		elseif session.level + 1 > LEVEL_COUNT then
+		elseif session.level + 1 > #levels then
 			endgame_init()
 			_update60 = endgame_update
 			_draw = endgame_draw
