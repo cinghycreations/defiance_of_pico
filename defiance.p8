@@ -1,6 +1,9 @@
 pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
+-- defiance of pico
+-- by cinghy creations
+
 #include defiance.lua
 #include levels.lua
 __gfx__
