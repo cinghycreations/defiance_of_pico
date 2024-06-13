@@ -11,4 +11,4 @@ target_include_directories( tileson INTERFACE "${CMAKE_SOURCE_DIR}/ext/tileson/i
 
 add_subdirectory( tools/src/levels_to_lua )
 
-install( TARGETS levels_to_lua RUNTIME DESTINATION "${CMAKE_SOURCE_DIR}" )
+install( TARGETS levels_to_lua RUNTIME DESTINATION "${CMAKE_SOURCE_DIR}/tools" )
