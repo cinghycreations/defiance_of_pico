@@ -11,16 +11,16 @@ local PAGE_FAIL = 3
 local PAGE_REPEAT = 4
 local PAGE_ENDGAME = 5
 
-page = nil
-next_page = nil
-current_session = nil
+local page = nil
+local next_page = nil
+local current_session = nil
 
-dbg = {
+local dbg = {
 	start_level = nil,
 	no_hud = false,
 }
 
-function session_init(level, total_frames)
+local function session_init(level, total_frames)
 	local session = {}
 	session.level = level or 1
 	session.camera_offset = 0
@@ -62,7 +62,7 @@ function session_init(level, total_frames)
 	return session
 end
 
-function clamp(value, min, max)
+local function clamp(value, min, max)
 	if value < min then
 		return min
 	elseif value > max then
@@ -72,7 +72,7 @@ function clamp(value, min, max)
 	end
 end
 
-function session_update(session)
+local function session_update(session)
 	if btnp(4) or btnp(5) then
 		next_page = PAGE_REPEAT
 		return
@@ -132,15 +132,15 @@ function session_update(session)
 	end
 end
 
-function format2(value)
+local function format2(value)
 	if value < 10 then return ' ' .. tostr(value) else return tostr(value) end
 end
 
-function create_caption(session)
+local function create_caption(session)
 	return 'level ' .. format2(session.level) .. '   frames ' .. session.level_frames
 end
 
-function session_draw(session)
+local function session_draw(session)
 	cls()
 
 	if session.ball_position[2] - 16 < session.camera_offset then
