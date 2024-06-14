@@ -13,7 +13,7 @@ local PAGE_ENDGAME = 5
 
 page = nil
 next_page = nil
-session = nil
+current_session = nil
 
 dbg = {
 	start_level = nil,
@@ -21,7 +21,7 @@ dbg = {
 }
 
 function session_init(level, total_frames)
-	session = {}
+	local session = {}
 	session.level = level or 1
 	session.camera_offset = 0
 	session.platform_speed = 1.2
@@ -58,6 +58,8 @@ function session_init(level, total_frames)
 		end
 		mset( scratch_area[1] + x, scratch_area[2] + y, tile )
 	end
+
+	return session
 end
 
 function clamp(value, min, max)
@@ -70,7 +72,7 @@ function clamp(value, min, max)
 	end
 end
 
-function session_update()
+function session_update(session)
 	if btnp(4) or btnp(5) then
 		next_page = PAGE_REPEAT
 		return
@@ -138,7 +140,7 @@ function create_caption(session)
 	return 'level ' .. format2(session.level) .. '   frames ' .. session.level_frames
 end
 
-function session_draw()
+function session_draw(session)
 	cls()
 
 	if session.ball_position[2] - 16 < session.camera_offset then
@@ -172,11 +174,11 @@ end
 
 function _init()
 	if dbg.start_level ~= nil then
-		session_init( dbg.start_level )
+		current_session = session_init( dbg.start_level )
 		page = PAGE_SESSION
 		next_page = nil
 	else
-		session = {}
+		current_session = {}
 		page = PAGE_SPLASH
 		next_page = nil
 	end
@@ -188,33 +190,33 @@ function _update60()
 
 	if page == PAGE_SPLASH then
 		if btnp(4) then
-			session_init()
+			current_session = session_init()
 			next_page = PAGE_SESSION
 		end
 	elseif page == PAGE_SESSION then
-		session_update()
+		session_update( current_session )
 	elseif page == PAGE_SUCCESS then
 		if btnp(5) then
-			session_init( session.level, session.total_frames )
+			current_session = session_init( current_session.level, current_session.total_frames )
 			next_page = PAGE_SESSION
 		elseif btnp(4) then
-			if session.level + 1 > #levels then
+			if current_session.level + 1 > #levels then
 				next_page = PAGE_ENDGAME
 			else
-				session_init( session.level + 1, session.total_frames )
+				current_session = session_init( current_session.level + 1, current_session.total_frames )
 				next_page = PAGE_SESSION
 			end
 		end
 	elseif page == PAGE_FAIL then
 		if btnp(4) then
-			session_init( session.level, session.total_frames )
+			current_session = session_init( current_session.level, current_session.total_frames )
 			next_page = PAGE_SESSION
 		elseif btnp(5) then
 			next_page = PAGE_SPLASH
 		end
 	elseif page == PAGE_REPEAT then
 		if btnp(4) then
-			session_init( session.level, session.total_frames )
+			current_session = session_init( current_session.level, current_session.total_frames )
 			next_page = PAGE_SESSION
 		elseif btnp(5) then
 			next_page = PAGE_SPLASH
@@ -233,25 +235,25 @@ function _draw()
 		print( '       pico of defiance         ' )
 		print( '       press ❎ to play         ' )
 	elseif page == PAGE_SESSION then
-		session_draw()
+		session_draw( current_session )
 	elseif page == PAGE_SUCCESS then
-		local level_time = session.level_frames * ( 1 / 60 )
-		local total_time = session.total_frames * ( 1 / 60 )
+		local level_time = current_session.level_frames * ( 1 / 60 )
+		local total_time = current_session.total_frames * ( 1 / 60 )
 
-		session_draw()
+		session_draw( current_session )
 		cursor( 0, 7 * 8 )
 		print( '    you collected all crowns!   ' )
 		print( '   your time is ' .. level_time )
 		print( '       press ❎ to proceed      ' )
 		print( '       press 🅾️ to retry     ' )
 	elseif page == PAGE_FAIL then
-		session_draw()
+		session_draw( current_session )
 		cursor( 0, 7 * 8 )
 		print( ' argh! you ended up on a spike. ' )
 		print( '        press ❎ to retry      ' )
 		print( '       press 🅾️ to quit        ' )
 	elseif page == PAGE_REPEAT then
-		session_draw()
+		session_draw( current_session )
 		cursor( 0, 7 * 8 )
 		print( ' do you want to retry, or quit? ' )
 		print( '       press ❎ to retry       ' )
