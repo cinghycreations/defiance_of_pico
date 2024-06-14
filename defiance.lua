@@ -11,18 +11,24 @@ local PAGE_FAIL = 3
 local PAGE_REPEAT = 4
 local PAGE_ENDGAME = 5
 
+local MODE_ALL_LEVELS = 0
+local MODE_SINGLE_LEVEL = 1
+
 local page = nil
 local next_page = nil
 local current_session = nil
+
+local splash_selected_level = 0
 
 local dbg = {
 	start_level = nil,
 	no_hud = false,
 }
 
-local function session_init(level, total_frames)
+local function session_init(mode, starting_level, total_frames)
 	local session = {}
-	session.level = level or 1
+	session.mode = mode or MODE_ALL_LEVELS
+	session.level = starting_level or 1
 	session.camera_offset = 0
 	session.platform_speed = 1.2
 	session.platform_offset = 0
@@ -201,8 +207,10 @@ local function session_draw(session)
 end
 
 function _init()
+	cartdata( 'defiance_of_pico-' .. '459c4f1f-b663-46c5-bb41-2e9ed887bed3')
+
 	if dbg.start_level ~= nil then
-		current_session = session_init( dbg.start_level )
+		current_session = session_init( MODE_SINGLE_LEVEL, dbg.start_level )
 		page = PAGE_SESSION
 		next_page = nil
 	else
@@ -217,34 +225,47 @@ function _update60()
 	next_page = nil
 
 	if page == PAGE_SPLASH then
-		if btnp(4) then
-			current_session = session_init()
+		if btnp(0) then
+			splash_selected_level = clamp( splash_selected_level - 1, 0, #levels )
+		elseif btnp(1) then
+			splash_selected_level = clamp( splash_selected_level + 1, 0, #levels )
+		elseif btnp(4) then
+			if splash_selected_level == 0 then
+				current_session = session_init( MODE_ALL_LEVELS )
+			else
+				current_session = session_init( MODE_SINGLE_LEVEL, splash_selected_level )
+			end
 			next_page = PAGE_SESSION
 		end
 	elseif page == PAGE_SESSION then
 		session_update( current_session )
 	elseif page == PAGE_SUCCESS then
 		if btnp(5) then
-			current_session = session_init( current_session.level, current_session.total_frames )
+			current_session = session_init( current_session.mode, current_session.level, current_session.total_frames )
 			next_page = PAGE_SESSION
 		elseif btnp(4) then
-			if current_session.level + 1 > #levels then
-				next_page = PAGE_ENDGAME
+			if current_session.mode == MODE_ALL_LEVELS then
+				if current_session.level + 1 > #levels then
+					next_page = PAGE_ENDGAME
+				else
+					current_session = session_init( current_session.mode, current_session.level + 1, current_session.total_frames )
+					next_page = PAGE_SESSION
+				end
 			else
-				current_session = session_init( current_session.level + 1, current_session.total_frames )
+				current_session = session_init( current_session.mode, current_session.level, current_session.total_frames )
 				next_page = PAGE_SESSION
 			end
 		end
 	elseif page == PAGE_FAIL then
 		if btnp(4) then
-			current_session = session_init( current_session.level, current_session.total_frames )
+			current_session = session_init( current_session.mode, current_session.level, current_session.total_frames )
 			next_page = PAGE_SESSION
 		elseif btnp(5) then
 			next_page = PAGE_SPLASH
 		end
 	elseif page == PAGE_REPEAT then
 		if btnp(4) then
-			current_session = session_init( current_session.level, current_session.total_frames )
+			current_session = session_init( current_session.mode, current_session.level, current_session.total_frames )
 			next_page = PAGE_SESSION
 		elseif btnp(5) then
 			next_page = PAGE_SPLASH
@@ -260,8 +281,15 @@ function _draw()
 	if page == PAGE_SPLASH then
 		cls()
 		cursor( 0, 7 * 8 )
-		print( '       pico of defiance         ' )
-		print( '       press ❎ to play         ' )
+		print( '        pico of defiance' )
+		print( '' )
+		if splash_selected_level == 0 then
+			print( '     ⬅️ play all levels ➡️' )
+		else
+			print( '       ⬅️ play level ' .. splash_selected_level .. ' ➡️' )
+		end
+		print( '' )
+		print( '        press ❎ to play         ' )
 	elseif page == PAGE_SESSION then
 		session_draw( current_session )
 	elseif page == PAGE_SUCCESS then
