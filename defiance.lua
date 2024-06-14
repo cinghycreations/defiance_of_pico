@@ -14,6 +14,8 @@ local PAGE_ENDGAME = 5
 local MODE_ALL_LEVELS = 0
 local MODE_SINGLE_LEVEL = 1
 
+local ALL_LEVELS_SCORE_SLOT = 0
+
 local page = nil
 local next_page = nil
 local current_session = nil
@@ -40,6 +42,18 @@ local function session_init(mode, starting_level, total_frames)
 	session.crowns_left = 0
 	session.level_frames = 0
 	session.total_frames = total_frames or 0
+	session.level_record = nil
+	session.total_record = nil
+
+	local level_record = dget( session.level )
+	if level_record ~= 0 then
+		session.level_record = level_record
+	end
+
+	local total_record = dget( ALL_LEVELS_SCORE_SLOT )
+	if total_record ~= 0 then
+		session.total_record = total_record
+	end
 
 	if session.level <= 8 then
 		session.background = 1
@@ -240,6 +254,18 @@ function _update60()
 	elseif page == PAGE_SESSION then
 		session_update( current_session )
 	elseif page == PAGE_SUCCESS then
+		if btnp(4) or btnp(5) then
+			if not current_session.level_record or current_session.level_frames < current_session.level_record then
+				dset( current_session.level, current_session.level_frames )
+			end
+
+			if current_session.mode == MODE_ALL_LEVELS and current_session.level == #levels then
+				if not current_session.total_record or current_session.total_frames < current_session.total_record then
+					dset( ALL_LEVELS_SCORE_SLOT, current_session.total_frames )
+				end
+			end
+		end
+
 		if btnp(5) then
 			current_session = session_init( current_session.mode, current_session.level, current_session.total_frames )
 			next_page = PAGE_SESSION
@@ -293,13 +319,29 @@ function _draw()
 	elseif page == PAGE_SESSION then
 		session_draw( current_session )
 	elseif page == PAGE_SUCCESS then
-		local level_time = current_session.level_frames * ( 1 / 60 )
-		local total_time = current_session.total_frames * ( 1 / 60 )
-
 		session_draw( current_session )
-		cursor( 0, 7 * 8 )
+		cursor( 0, 6 * 8 )
 		print( '    you collected all crowns!   ' )
-		print( '   your time is ' .. level_time )
+		print( '' )
+		
+		print( '   your level time is ' .. format_time( current_session.level_frames ) )
+		if not current_session.level_record or current_session.level_frames < current_session.level_record then
+			print( '   new level record!' )
+		else
+			print( '   record is ' .. format_time( current_session.level_record ) )
+		end
+		print( '' )
+
+		if current_session.mode == MODE_ALL_LEVELS and current_session.level == #levels then
+			print( '   your total time is ' .. format_time( current_session.total_frames ) )
+			if not current_session.total_record or current_session.total_frames < current_session.total_record then
+				print( '   new all levels record!' )
+			else
+				print( '   record is ' .. format_time( current_session.total_record ) )
+			end
+			print( '' )
+		end
+
 		print( '       press ❎ to proceed      ' )
 		print( '       press 🅾️ to retry     ' )
 	elseif page == PAGE_FAIL then
