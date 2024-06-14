@@ -132,12 +132,40 @@ local function session_update(session)
 	end
 end
 
+local function format_time(frames)
+	local time = frames * (1 / 60)
+
+	if time >= 100 then
+		return '99.999'
+	end
+
+	secs = flr(time)
+	msec = flr( ( time - flr(time) ) * 1000 )
+
+	s_sec = tostr(secs)
+	if #s_sec == 1 then
+		s_sec = ' ' .. s_sec
+	end
+
+	s_msec = tostr(msec)
+	if #s_msec == 1 then
+		s_msec = '00' .. s_msec
+	elseif #s_msec == 2 then
+		s_msec = '0' .. s_msec
+	elseif #s_msec == 3 then
+	else
+		s_msec = sub( s_msec, 1, 3 )
+	end
+
+	return s_sec .. '.' .. s_msec
+end
+
 local function format2(value)
 	if value < 10 then return ' ' .. tostr(value) else return tostr(value) end
 end
 
 local function create_caption(session)
-	return 'level ' .. format2(session.level) .. '   frames ' .. session.level_frames
+	return 'level ' .. format2(session.level) .. '             time ' .. format_time( session.level_frames )
 end
 
 local function session_draw(session)
