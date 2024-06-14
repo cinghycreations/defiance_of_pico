@@ -1,4 +1,4 @@
-## Level concepts
+## Level concepts - 1st pass
 
 |Number|Difficulty|Description|Pass|
 |-|-|-|-|
@@ -22,3 +22,10 @@
 |18|9|Climb|1|
 |19|10|Trampoline Climb|1|
 |20|F|Final|1|
+
+## Level concepts - 2nd pass
+
+After a bunch of playthrough, I've come to the following conclusions:
+1. The game is more fun when it allows you to focus on speed and smoothness instead of interrupting you to retry
+2. So we should have fewer levels but longer, thus with more room to shave a split second here and there
+3. Also remove all those gameplay devices that are overly difficult, for example the Upward Trajectory that causes endless repeats

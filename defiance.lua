@@ -3,17 +3,10 @@ local TILE_CROWN = 3
 local TILE_SHELF = 1
 local TILE_BOOSTER = 2
 local TILE_SPIKES = 4
-local LEVEL_TESTBED = 255
-local LEVEL_COUNT = 16
 
 dbg = {
 	start_level = nil,
 	no_hud = false,
-}
-
-areas = {
-	scratch = { 0, 0, 16, 32 },
-	splash = { 48, 0, 16, 16 },
 }
 
 function session_init(level, total_frames)
@@ -37,9 +30,10 @@ function session_init(level, total_frames)
 		session.background = 2
 	end
 
-	for i = 0, areas.scratch[3] - 1 do
-		for j = 0, areas.scratch[4] - 1 do
-			mset( areas.scratch[1] + i, areas.scratch[2] + j, 0 )
+	local scratch_area = { 0, 0, 16, 32 }
+	for i = 0, scratch_area[3] - 1 do
+		for j = 0, scratch_area[4] - 1 do
+			mset( scratch_area[1] + i, scratch_area[2] + j, 0 )
 		end
 	end
 
@@ -51,7 +45,7 @@ function session_init(level, total_frames)
 		if tile == TILE_CROWN then
 			session.crowns_left = session.crowns_left + 1
 		end
-		mset( areas.scratch[1] + x, areas.scratch[2] + y, tile )
+		mset( scratch_area[1] + x, scratch_area[2] + y, tile )
 	end
 end
 
@@ -66,7 +60,7 @@ function clamp(value, min, max)
 end
 
 function session_update()
-	if btnp(4) then
+	if btnp(4) or btnp(5) then
 		repeat_init()
 		_update60 = repeat_update
 		_draw = repeat_draw
@@ -175,16 +169,12 @@ function success_init()
 end
 
 function success_update()
-	if btnp(4) then
+	if btnp(5) then
 		session_init( session.level, session.total_frames )
 		_update60 = session_update
 		_draw = session_draw
-	elseif btnp(5) then
-		if session.level == LEVEL_TESTBED then
-			session_init( LEVEL_TESTBED )
-			_update60 = session_update
-			_draw = session_draw
-		elseif session.level + 1 > #levels then
+	elseif btnp(4) then
+		if session.level + 1 > #levels then
 			endgame_init()
 			_update60 = endgame_update
 			_draw = endgame_draw
@@ -204,8 +194,8 @@ function success_draw()
 	cursor( 0, 7 * 8 )
 	print( '    you collected all crowns!   ' )
 	print( '   your time is ' .. level_time )
-	print( '       press ❎ to retry      ' )
-	print( '       press 🅾️ to proceed     ' )
+	print( '       press ❎ to proceed      ' )
+	print( '       press 🅾️ to retry     ' )
 end
 
 function fail_init()
