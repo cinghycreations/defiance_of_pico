@@ -4,6 +4,17 @@ local TILE_SHELF = 1
 local TILE_BOOSTER = 2
 local TILE_SPIKES = 4
 
+local PAGE_SPLASH = 0
+local PAGE_SESSION = 1
+local PAGE_SUCCESS = 2
+local PAGE_FAIL = 3
+local PAGE_REPEAT = 4
+local PAGE_ENDGAME = 5
+
+page = nil
+next_page = nil
+session = nil
+
 dbg = {
 	start_level = nil,
 	no_hud = false,
@@ -61,9 +72,7 @@ end
 
 function session_update()
 	if btnp(4) or btnp(5) then
-		repeat_init()
-		_update60 = repeat_update
-		_draw = repeat_draw
+		next_page = PAGE_REPEAT
 		return
 	end
 
@@ -110,17 +119,13 @@ function session_update()
 
 	-- success
 	if session.crowns_left == 0 then
-		success_init()
-		_update60 = success_update
-		_draw = success_draw
+		next_page = PAGE_SUCCESS
 		return
 	end
 
 	-- fail
 	if center_tile == TILE_SPIKES then
-		fail_init()
-		_update60 = fail_update
-		_draw = fail_draw
+		next_page = PAGE_FAIL
 		return
 	end
 end
@@ -165,125 +170,94 @@ function session_draw()
 	end
 end
 
-function success_init()
+function _init()
+	if dbg.start_level ~= nil then
+		session_init( dbg.start_level )
+		page = PAGE_SESSION
+		next_page = nil
+	else
+		session = {}
+		page = PAGE_SPLASH
+		next_page = nil
+	end
 end
 
-function success_update()
-	if btnp(5) then
-		session_init( session.level, session.total_frames )
-		_update60 = session_update
-		_draw = session_draw
-	elseif btnp(4) then
-		if session.level + 1 > #levels then
-			endgame_init()
-			_update60 = endgame_update
-			_draw = endgame_draw
-		else
-			session_init( session.level + 1, session.total_frames )
-			_update60 = session_update
-			_draw = session_draw
+function _update60()
+	page = next_page or page
+	next_page = nil
+
+	if page == PAGE_SPLASH then
+		if btnp(4) then
+			session_init()
+			next_page = PAGE_SESSION
+		end
+	elseif page == PAGE_SESSION then
+		session_update()
+	elseif page == PAGE_SUCCESS then
+		if btnp(5) then
+			session_init( session.level, session.total_frames )
+			next_page = PAGE_SESSION
+		elseif btnp(4) then
+			if session.level + 1 > #levels then
+				next_page = PAGE_ENDGAME
+			else
+				session_init( session.level + 1, session.total_frames )
+				next_page = PAGE_SESSION
+			end
+		end
+	elseif page == PAGE_FAIL then
+		if btnp(4) then
+			session_init( session.level, session.total_frames )
+			next_page = PAGE_SESSION
+		elseif btnp(5) then
+			next_page = PAGE_SPLASH
+		end
+	elseif page == PAGE_REPEAT then
+		if btnp(4) then
+			session_init( session.level, session.total_frames )
+			next_page = PAGE_SESSION
+		elseif btnp(5) then
+			next_page = PAGE_SPLASH
+		end
+	elseif page == PAGE_ENDGAME then
+		if btnp(4) or btnp(5) then
+			next_page = PAGE_SPLASH
 		end
 	end
 end
 
-function success_draw()
-	local level_time = session.level_frames * ( 1 / 60 )
-	local total_time = session.total_frames * ( 1 / 60 )
+function _draw()
+	if page == PAGE_SPLASH then
+		cls()
+		cursor( 0, 7 * 8 )
+		print( '       pico of defiance         ' )
+		print( '       press ❎ to play         ' )
+	elseif page == PAGE_SESSION then
+		session_draw()
+	elseif page == PAGE_SUCCESS then
+		local level_time = session.level_frames * ( 1 / 60 )
+		local total_time = session.total_frames * ( 1 / 60 )
 
-	session_draw()
-	cursor( 0, 7 * 8 )
-	print( '    you collected all crowns!   ' )
-	print( '   your time is ' .. level_time )
-	print( '       press ❎ to proceed      ' )
-	print( '       press 🅾️ to retry     ' )
-end
-
-function fail_init()
-end
-
-function fail_update()
-	if btnp(4) then
-		session_init( session.level, session.total_frames )
-		_update60 = session_update
-		_draw = session_draw
-	elseif btnp(5) then
-		splash_init()
-		_update60 = splash_update
-		_draw = splash_draw
+		session_draw()
+		cursor( 0, 7 * 8 )
+		print( '    you collected all crowns!   ' )
+		print( '   your time is ' .. level_time )
+		print( '       press ❎ to proceed      ' )
+		print( '       press 🅾️ to retry     ' )
+	elseif page == PAGE_FAIL then
+		session_draw()
+		cursor( 0, 7 * 8 )
+		print( ' argh! you ended up on a spike. ' )
+		print( '        press ❎ to retry      ' )
+		print( '       press 🅾️ to quit        ' )
+	elseif page == PAGE_REPEAT then
+		session_draw()
+		cursor( 0, 7 * 8 )
+		print( ' do you want to retry, or quit? ' )
+		print( '       press ❎ to retry       ' )
+		print( '        press 🅾️ to quit       ' )
+	elseif page == PAGE_ENDGAME then
+		cls()
+		print( '*** placeholder endgame ***' )
 	end
-end
-
-function fail_draw()
-	session_draw()
-	cursor( 0, 7 * 8 )
-	print( ' argh! you ended up on a spike. ' )
-	print( '        press ❎ to retry      ' )
-	print( '       press 🅾️ to quit        ' )
-end
-
-function repeat_init()
-end
-
-function repeat_update()
-	if btnp(4) then
-		session_init( session.level, session.total_frames )
-		_update60 = session_update
-		_draw = session_draw
-	elseif btnp(5) then
-		splash_init()
-		_update60 = splash_update
-		_draw = splash_draw
-	end
-end
-
-function repeat_draw()
-	session_draw()
-	cursor( 0, 7 * 8 )
-	print( ' do you want to retry, or quit? ' )
-	print( '       press ❎ to retry       ' )
-	print( '        press 🅾️ to quit       ' )
-end
-
-function splash_init()
-end
-
-function splash_update()
-	if btnp(4) then
-		session_init()
-		_update60 = session_update
-		_draw = session_draw
-	end
-end
-
-function splash_draw()
-	cls()
-	cursor( 0, 7 * 8 )
-	print( '       pico of defiance         ' )
-	print( '       press ❎ to play         ' )
-end
-
-function endgame_init()
-end
-
-function endgame_update()
-	if btnp(4) or btnp(5) then
-		splash_init()
-		_update60 = splash_update
-		_draw = splash_draw
-	end
-end
-
-function endgame_draw()
-	cls()
-	print( '*** placeholder endgame ***' )
-end
-
-if dbg.start_level ~= nil then
-	_init = function() session_init( dbg.start_level ) end
-	_update60 = session_update
-	_draw = session_draw
-else
-	_init = splash_init
-	_update60 = splash_update
-	_draw = splash_draw
 end
