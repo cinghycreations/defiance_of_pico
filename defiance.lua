@@ -115,12 +115,16 @@ local function session_update(session)
 	session.ball_position[2] = session.ball_position[2] + session.ball_speed
 
 	-- collisions
-	center_cell = { flr( session.ball_position[1] / 8 ), flr( session.ball_position[2] / 8 ) }
-	center_tile = mget( center_cell[1], center_cell[2] )
 
-	if center_tile == TILE_CROWN then
-		session.crowns_left = session.crowns_left - 1
-		mset( center_cell[1], center_cell[2], TILE_EMPTY )
+	local corner_sample_offsets = { { -2, -2 }, { -2, 2 }, { 2, -2 }, { 2, 2 }  }
+	for key, value in pairs( corner_sample_offsets ) do
+		crown_cell = { flr( ( session.ball_position[1] + value[1] ) / 8 ), flr( ( session.ball_position[2] + value[2] ) / 8 ) }
+		crown_tile = mget( crown_cell[1], crown_cell[2] )
+
+		if crown_tile == TILE_CROWN then
+			session.crowns_left = session.crowns_left - 1
+			mset( crown_cell[1], crown_cell[2], TILE_EMPTY )
+		end
 	end
 
 	local ground_sample_offsets = { { -2, 4 }, { 0, 4 }, { 2, 4 } }
@@ -146,6 +150,8 @@ local function session_update(session)
 	end
 
 	-- fail
+	center_cell = { flr( session.ball_position[1] / 8 ), flr( session.ball_position[2] / 8 ) }
+	center_tile = mget( center_cell[1], center_cell[2] )
 	if center_tile == TILE_SPIKES then
 		next_page = PAGE_FAIL
 		return
