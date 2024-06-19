@@ -155,8 +155,8 @@ end
 local function format_time(frames)
 	local time = frames * (1 / 60)
 
-	if time >= 100 then
-		return '99.999'
+	if time >= 1000 then
+		return '999.999'
 	end
 
 	secs = flr(time)
@@ -164,6 +164,8 @@ local function format_time(frames)
 
 	s_sec = tostr(secs)
 	if #s_sec == 1 then
+		s_sec = '  ' .. s_sec
+	elseif #s_sec == 2 then
 		s_sec = ' ' .. s_sec
 	end
 
@@ -185,7 +187,7 @@ local function format2(value)
 end
 
 local function create_caption(session)
-	return 'level ' .. format2(session.level) .. '             time ' .. format_time( session.level_frames )
+	return 'level ' .. format2(session.level) .. '            time ' .. format_time( session.level_frames )
 end
 
 local function session_draw(session)
