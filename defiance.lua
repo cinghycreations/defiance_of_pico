@@ -34,7 +34,7 @@ local function session_init(mode, starting_level, total_frames)
 	session.camera_offset = 0
 	session.platform_speed = 1.2
 	session.platform_offset = 0
-	session.ball_position = { 0, 256 - 64 }
+	session.ball_position = { 0, 256 - 8 }
 	session.ball_speed = 0
 	session.ball_impulse = -3.25
 	session.ball_booster_impulse = -5
