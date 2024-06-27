@@ -289,12 +289,13 @@ function _update60()
 		end
 
 		if btnp(5) then
-			current_session = session_init( current_session.mode, current_session.level, current_session.total_frames )
-			next_page = PAGE_SESSION
+			next_page = PAGE_SPLASH
+			splash_level_records = nil
 		elseif btnp(4) then
 			if current_session.mode == MODE_ALL_LEVELS then
 				if current_session.level + 1 > #levels then
-					next_page = PAGE_ENDGAME
+					next_page = PAGE_SPLASH
+					splash_level_records = nil
 				else
 					current_session = session_init( current_session.mode, current_session.level + 1, current_session.total_frames )
 					next_page = PAGE_SESSION
@@ -376,20 +377,25 @@ function _draw()
 			print( '' )
 		end
 
-		print( '       press ❎ to proceed      ' )
-		print( '       press 🅾️ to retry     ' )
+		if current_session.mode == MODE_ALL_LEVELS then
+			print( '       press ❎ to proceed' )
+			print( '       press 🅾️ to quit' )
+		else
+			print( '       press ❎ to retry' )
+			print( '       press 🅾️ to quit' )
+		end
 	elseif page == PAGE_FAIL then
 		session_draw( current_session )
 		cursor( 0, 7 * 8 )
-		print( ' argh! you ended up on a spike. ' )
-		print( '        press ❎ to retry      ' )
-		print( '       press 🅾️ to quit        ' )
+		print( ' argh! you ended up on a spike.' )
+		print( '        press ❎ to retry' )
+		print( '       press 🅾️ to quit' )
 	elseif page == PAGE_REPEAT then
 		session_draw( current_session )
 		cursor( 0, 7 * 8 )
 		print( ' do you want to retry, or quit? ' )
-		print( '       press ❎ to retry       ' )
-		print( '        press 🅾️ to quit       ' )
+		print( '       press ❎ to retry' )
+		print( '        press 🅾️ to quit' )
 	elseif page == PAGE_ENDGAME then
 		cls()
 		print( '*** placeholder endgame ***' )
