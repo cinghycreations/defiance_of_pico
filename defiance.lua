@@ -25,6 +25,7 @@ local splash_level_records = nil
 local dbg = {
 	start_level = nil,
 	no_hud = false,
+	no_death = false,
 }
 
 local function session_init(mode, starting_level, total_frames)
@@ -150,11 +151,13 @@ local function session_update(session)
 	end
 
 	-- fail
-	center_cell = { flr( session.ball_position[1] / 8 ), flr( session.ball_position[2] / 8 ) }
-	center_tile = mget( center_cell[1], center_cell[2] )
-	if center_tile == TILE_SPIKES then
-		next_page = PAGE_FAIL
-		return
+	if not dbg.no_death then
+		center_cell = { flr( session.ball_position[1] / 8 ), flr( session.ball_position[2] / 8 ) }
+		center_tile = mget( center_cell[1], center_cell[2] )
+		if center_tile == TILE_SPIKES then
+			next_page = PAGE_FAIL
+			return
+		end
 	end
 end
 
