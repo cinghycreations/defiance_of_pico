@@ -232,7 +232,7 @@ local function session_draw(session)
 end
 
 function _init()
-	cartdata( 'defiance_of_pico-' .. '459c4f1f-b663-46c5-bb41-2e9ed887bed3')
+	cartdata( 'defiance_of_pico_' .. 'v0-1')
 
 	if dbg.start_level ~= nil then
 		current_session = session_init( MODE_SINGLE_LEVEL, dbg.start_level )
