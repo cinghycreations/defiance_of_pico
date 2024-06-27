@@ -21,6 +21,7 @@ local next_page = nil
 local current_session = nil
 
 local splash_selected_level = 0
+local splash_level_records = nil
 
 local dbg = {
 	start_level = nil,
@@ -159,6 +160,10 @@ local function session_update(session)
 end
 
 local function format_time(frames)
+	if frames == 0 then
+		return '   none'
+	end
+
 	local time = frames * (1 / 60)
 
 	if time >= 1000 then
@@ -238,6 +243,7 @@ function _init()
 	else
 		current_session = {}
 		page = PAGE_SPLASH
+		splash_level_records = nil
 		next_page = nil
 	end
 end
@@ -247,6 +253,14 @@ function _update60()
 	next_page = nil
 
 	if page == PAGE_SPLASH then
+		if splash_level_records == nil then
+			splash_level_records = {}
+			splash_level_records[ALL_LEVELS_SCORE_SLOT] = dget( ALL_LEVELS_SCORE_SLOT )
+			for level = 1, #levels do
+				splash_level_records[level] = dget( level )
+			end
+		end
+
 		if btnp(0) then
 			splash_selected_level = clamp( splash_selected_level - 1, 0, #levels )
 		elseif btnp(1) then
@@ -296,6 +310,7 @@ function _update60()
 			next_page = PAGE_SESSION
 		elseif btnp(5) then
 			next_page = PAGE_SPLASH
+			splash_level_records = nil
 		end
 	elseif page == PAGE_REPEAT then
 		if btnp(4) then
@@ -303,10 +318,12 @@ function _update60()
 			next_page = PAGE_SESSION
 		elseif btnp(5) then
 			next_page = PAGE_SPLASH
+			splash_level_records = nil
 		end
 	elseif page == PAGE_ENDGAME then
 		if btnp(4) or btnp(5) then
 			next_page = PAGE_SPLASH
+			splash_level_records = nil
 		end
 	end
 end
@@ -314,16 +331,25 @@ end
 function _draw()
 	if page == PAGE_SPLASH then
 		cls()
-		cursor( 0, 7 * 8 )
-		print( '        pico of defiance' )
+		cursor( 0, 3 * 8 )
+		print( '        defiance of pico' )
 		print( '' )
 		if splash_selected_level == 0 then
-			print( '     ⬅️ play all levels ➡️' )
+			print( '     ⬅️ full playthrough ➡️' )
 		else
-			print( '       ⬅️ play level ' .. splash_selected_level .. ' ➡️' )
+			print( '          ⬅️ level ' .. splash_selected_level .. ' ➡️' )
 		end
+		print( '        press ❎ to play' )
 		print( '' )
-		print( '        press ❎ to play         ' )
+		print( '' )
+		print( '' )
+		print( '             records' )
+		print( '' )
+		print( 'level 1 ' .. format_time( splash_level_records[1] ) .. '  level 5 ' .. format_time( splash_level_records[5] ) )
+		print( 'level 2 ' .. format_time( splash_level_records[2] ) .. '  level 6 ' .. format_time( splash_level_records[6] ) )
+		print( 'level 3 ' .. format_time( splash_level_records[3] ) .. '  level 7 ' .. format_time( splash_level_records[7] ) )
+		print( 'level 4 ' .. format_time( splash_level_records[4] ) .. '  level 8 ' .. format_time( splash_level_records[8] ) )
+		print( '    full playthrough ' .. format_time( splash_level_records[ALL_LEVELS_SCORE_SLOT] ) )
 	elseif page == PAGE_SESSION then
 		session_draw( current_session )
 	elseif page == PAGE_SUCCESS then
