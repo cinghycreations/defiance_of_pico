@@ -28,7 +28,7 @@ local dbg = {
 	no_death = false,
 }
 
-local function session_init(mode, starting_level, total_frames)
+local function session_init(mode, starting_level, frames)
 	local session = {}
 	session.mode = mode or MODE_ALL_LEVELS
 	session.level = starting_level or 1
@@ -41,22 +41,19 @@ local function session_init(mode, starting_level, total_frames)
 	session.ball_booster_impulse = -5
 	session.ball_gravity = 9.81
 	session.crowns_left = 0
-	session.level_frames = 0
-	session.total_frames = total_frames or 0
-	session.level_record = nil
-	session.total_record = nil
+	session.frames = frames or 0
+	session.record = nil
 
-	local level_record = dget( session.level )
-	if level_record ~= 0 then
-		session.level_record = level_record
+	if session.mode == MODE_ALL_LEVELS then
+		record = dget( ALL_LEVELS_SCORE_SLOT )
+	else
+		record = dget( session.level )
+	end
+	if record ~= 0 then
+		session.record = record
 	end
 
-	local total_record = dget( ALL_LEVELS_SCORE_SLOT )
-	if total_record ~= 0 then
-		session.total_record = total_record
-	end
-
-	if session.level <= 8 then
+	if session.level <= 4 then
 		session.background = 1
 	else
 		session.background = 2
@@ -102,8 +99,7 @@ local function session_update(session)
 	local elapsed_time = 1 / 60
 
 	-- frames
-	session.level_frames = session.level_frames + 1
-	session.total_frames = session.total_frames + 1
+	session.frames = session.frames + 1
 
 	-- platform
 	if btn(0) then session.platform_offset = session.platform_offset - session.platform_speed end
@@ -200,7 +196,7 @@ local function format2(value)
 end
 
 local function create_caption(session)
-	return 'level ' .. format2(session.level) .. '            time ' .. format_time( session.level_frames )
+	return 'level ' .. format2(session.level) .. '            time ' .. format_time( session.frames )
 end
 
 local function session_draw(session)
@@ -279,13 +275,13 @@ function _update60()
 		session_update( current_session )
 	elseif page == PAGE_SUCCESS then
 		if btnp(4) or btnp(5) then
-			if not current_session.level_record or current_session.level_frames < current_session.level_record then
-				dset( current_session.level, current_session.level_frames )
-			end
-
-			if current_session.mode == MODE_ALL_LEVELS and current_session.level == #levels then
-				if not current_session.total_record or current_session.total_frames < current_session.total_record then
-					dset( ALL_LEVELS_SCORE_SLOT, current_session.total_frames )
+			if current_session.mode == MODE_ALL_LEVELS then
+				if current_session.level == #levels and ( not current_session.record or current_session.frames < current_session.record ) then
+					dset( ALL_LEVELS_SCORE_SLOT, current_session.frames )
+				end
+			else
+				if not current_session.record or current_session.frames < current_session.record then
+					dset( current_session.level, current_session.frames )
 				end
 			end
 		end
@@ -299,17 +295,21 @@ function _update60()
 					next_page = PAGE_SPLASH
 					splash_level_records = nil
 				else
-					current_session = session_init( current_session.mode, current_session.level + 1, current_session.total_frames )
+					current_session = session_init( current_session.mode, current_session.level + 1, current_session.frames )
 					next_page = PAGE_SESSION
 				end
 			else
-				current_session = session_init( current_session.mode, current_session.level, current_session.total_frames )
+				current_session = session_init( current_session.mode, current_session.level )
 				next_page = PAGE_SESSION
 			end
 		end
 	elseif page == PAGE_FAIL then
 		if btnp(4) then
-			current_session = session_init( current_session.mode, current_session.level, current_session.total_frames )
+			if current_session.mode == MODE_ALL_LEVELS then
+				current_session = session_init( current_session.mode, current_session.level, current_session.frames )
+			else
+				current_session = session_init( current_session.mode, current_session.level )
+			end
 			next_page = PAGE_SESSION
 		elseif btnp(5) then
 			next_page = PAGE_SPLASH
@@ -317,7 +317,11 @@ function _update60()
 		end
 	elseif page == PAGE_REPEAT then
 		if btnp(4) then
-			current_session = session_init( current_session.mode, current_session.level, current_session.total_frames )
+			if current_session.mode == MODE_ALL_LEVELS then
+				current_session = session_init( current_session.mode, current_session.level, current_session.frames )
+			else
+				current_session = session_init( current_session.mode, current_session.level )
+			end
 			next_page = PAGE_SESSION
 		elseif btnp(5) then
 			next_page = PAGE_SPLASH
@@ -356,20 +360,12 @@ function _draw()
 		print( '    you collected all crowns!   ' )
 		print( '' )
 		
-		print( '   your level time is ' .. format_time( current_session.level_frames ) )
-		if not current_session.level_record or current_session.level_frames < current_session.level_record then
-			print( '   new level record!' )
-		else
-			print( '   record is ' .. format_time( current_session.level_record ) )
-		end
-		print( '' )
-
-		if current_session.mode == MODE_ALL_LEVELS and current_session.level == #levels then
-			print( '   your total time is ' .. format_time( current_session.total_frames ) )
-			if not current_session.total_record or current_session.total_frames < current_session.total_record then
-				print( '   new all levels record!' )
+		if current_session.mode == MODE_SINGLE_LEVEL or ( current_session.mode == MODE_ALL_LEVELS and current_session.level == #levels ) then
+			print( '   your time is ' .. format_time( current_session.frames ) )
+			if not current_session.record or current_session.frames < current_session.record then
+				print( '   new record!' )
 			else
-				print( '   record is ' .. format_time( current_session.total_record ) )
+				print( '   record is ' .. format_time( current_session.record ) )
 			end
 			print( '' )
 		end
