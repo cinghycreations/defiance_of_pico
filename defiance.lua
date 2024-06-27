@@ -9,7 +9,6 @@ local PAGE_SESSION = 1
 local PAGE_SUCCESS = 2
 local PAGE_FAIL = 3
 local PAGE_REPEAT = 4
-local PAGE_ENDGAME = 5
 
 local MODE_ALL_LEVELS = 0
 local MODE_SINGLE_LEVEL = 1
@@ -321,11 +320,6 @@ function _update60()
 			next_page = PAGE_SPLASH
 			splash_level_records = nil
 		end
-	elseif page == PAGE_ENDGAME then
-		if btnp(4) or btnp(5) then
-			next_page = PAGE_SPLASH
-			splash_level_records = nil
-		end
 	end
 end
 
@@ -396,8 +390,5 @@ function _draw()
 		print( ' do you want to retry, or quit? ' )
 		print( '       press ❎ to retry' )
 		print( '        press 🅾️ to quit' )
-	elseif page == PAGE_ENDGAME then
-		cls()
-		print( '*** placeholder endgame ***' )
 	end
 end
