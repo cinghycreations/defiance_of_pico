@@ -5,6 +5,7 @@ local TILE_BOOSTER = 2
 local TILE_SPIKES = 4
 
 local PAGE_SPLASH = 0
+local PAGE_RECORDS = 5
 local PAGE_SESSION = 1
 local PAGE_SUCCESS = 2
 local PAGE_FAIL = 3
@@ -20,7 +21,7 @@ local next_page = nil
 local current_session = nil
 
 local splash_selected_level = 0
-local splash_level_records = nil
+local records_page_data = nil
 
 local dbg = {
 	start_level = nil,
@@ -241,7 +242,6 @@ function _init()
 	else
 		current_session = {}
 		page = PAGE_SPLASH
-		splash_level_records = nil
 		next_page = nil
 	end
 end
@@ -251,14 +251,6 @@ function _update60()
 	next_page = nil
 
 	if page == PAGE_SPLASH then
-		if splash_level_records == nil then
-			splash_level_records = {}
-			splash_level_records[ALL_LEVELS_SCORE_SLOT] = dget( ALL_LEVELS_SCORE_SLOT )
-			for level = 1, #levels do
-				splash_level_records[level] = dget( level )
-			end
-		end
-
 		if btnp(⬅️) then
 			splash_selected_level = clamp( splash_selected_level - 1, 0, #levels )
 		elseif btnp(➡️) then
@@ -270,6 +262,21 @@ function _update60()
 				current_session = session_init( MODE_SINGLE_LEVEL, splash_selected_level )
 			end
 			next_page = PAGE_SESSION
+		elseif btnp(🅾️) then
+			next_page = PAGE_RECORDS
+			records_page_data = nil
+		end
+	elseif page == PAGE_RECORDS then
+		if records_page_data == nil then
+			records_page_data = {}
+			records_page_data[ALL_LEVELS_SCORE_SLOT] = dget( ALL_LEVELS_SCORE_SLOT )
+			for level = 1, #levels do
+				records_page_data[level] = dget( level )
+			end
+		end
+
+		if btnp(🅾️) then
+			next_page = PAGE_SPLASH
 		end
 	elseif page == PAGE_SESSION then
 		session_update( current_session )
@@ -288,12 +295,10 @@ function _update60()
 
 		if btnp(🅾️) then
 			next_page = PAGE_SPLASH
-			splash_level_records = nil
 		elseif btnp(❎) then
 			if current_session.mode == MODE_ALL_LEVELS then
 				if current_session.level + 1 > #levels then
 					next_page = PAGE_SPLASH
-					splash_level_records = nil
 				else
 					current_session = session_init( current_session.mode, current_session.level + 1, current_session.frames )
 					next_page = PAGE_SESSION
@@ -313,7 +318,6 @@ function _update60()
 			next_page = PAGE_SESSION
 		elseif btnp(🅾️) then
 			next_page = PAGE_SPLASH
-			splash_level_records = nil
 		end
 	elseif page == PAGE_REPEAT then
 		if btnp(❎) then
@@ -325,7 +329,6 @@ function _update60()
 			next_page = PAGE_SESSION
 		elseif btnp(🅾️) then
 			next_page = PAGE_SPLASH
-			splash_level_records = nil
 		end
 	end
 end
@@ -333,25 +336,26 @@ end
 function _draw()
 	if page == PAGE_SPLASH then
 		cls()
-		camera( 0, 0 )
-		cursor( 0, 0 )
 		map( 48, 0, 0, 0, 16, 16 )
-		cursor( 0, 7 * 8 )
+		cursor( 0, 12 * 8 )
 		if splash_selected_level == 0 then
 			print( '     ⬅️ full playthrough ➡️' )
 		else
 			print( '          ⬅️ level ' .. splash_selected_level .. ' ➡️' )
 		end
+		print( '' )
 		print( '        press ❎ to play' )
+		print( '    press 🅾️ to show records' )
+	elseif page == PAGE_RECORDS then
+		cls()
+		map( 48, 0, 0, 0, 16, 16 )
+		cursor( 0, 7 * 8 )
+		for level = 1, #levels do
+			print( '       level ' .. level .. '     ' .. format_time( records_page_data[level] ) )
+		end
+		print( '  full playthrough ' .. format_time( records_page_data[ALL_LEVELS_SCORE_SLOT] ) )
 		print( '' )
-		print( '' )
-		print( '             records' )
-		print( '' )
-		print( 'level 1 ' .. format_time( splash_level_records[1] ) .. '  level 5 ' .. format_time( splash_level_records[5] ) )
-		print( 'level 2 ' .. format_time( splash_level_records[2] ) .. '  level 6 ' .. format_time( splash_level_records[6] ) )
-		print( 'level 3 ' .. format_time( splash_level_records[3] ) .. '  level 7 ' .. format_time( splash_level_records[7] ) )
-		print( 'level 4 ' .. format_time( splash_level_records[4] ) .. '  level 8 ' .. format_time( splash_level_records[8] ) )
-		print( '    full playthrough ' .. format_time( splash_level_records[ALL_LEVELS_SCORE_SLOT] ) )
+		print( '       press 🅾️ to go back' )
 	elseif page == PAGE_SESSION then
 		session_draw( current_session )
 	elseif page == PAGE_SUCCESS then
