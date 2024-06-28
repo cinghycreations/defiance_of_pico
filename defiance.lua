@@ -333,16 +333,16 @@ end
 function _draw()
 	if page == PAGE_SPLASH then
 		cls()
-		cursor( 0, 3 * 8 )
-		print( '        defiance of pico' )
-		print( '' )
+		camera( 0, 0 )
+		cursor( 0, 0 )
+		map( 48, 0, 0, 0, 16, 16 )
+		cursor( 0, 7 * 8 )
 		if splash_selected_level == 0 then
 			print( '     ⬅️ full playthrough ➡️' )
 		else
 			print( '          ⬅️ level ' .. splash_selected_level .. ' ➡️' )
 		end
 		print( '        press ❎ to play' )
-		print( '' )
 		print( '' )
 		print( '' )
 		print( '             records' )
