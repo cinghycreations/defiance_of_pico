@@ -91,7 +91,7 @@ local function clamp(value, min, max)
 end
 
 local function session_update(session)
-	if btnp(4) or btnp(5) then
+	if btnp(❎) or btnp(🅾️) then
 		next_page = PAGE_REPEAT
 		return
 	end
@@ -102,8 +102,8 @@ local function session_update(session)
 	session.frames = session.frames + 1
 
 	-- platform
-	if btn(0) then session.platform_offset = session.platform_offset - session.platform_speed end
-	if btn(1) then session.platform_offset = session.platform_offset + session.platform_speed end
+	if btn(⬅️) then session.platform_offset = session.platform_offset - session.platform_speed end
+	if btn(➡️) then session.platform_offset = session.platform_offset + session.platform_speed end
 	session.platform_offset = clamp( session.platform_offset, 4, 128 - 4 )
 
 	-- ball gravity
@@ -259,11 +259,11 @@ function _update60()
 			end
 		end
 
-		if btnp(0) then
+		if btnp(⬅️) then
 			splash_selected_level = clamp( splash_selected_level - 1, 0, #levels )
-		elseif btnp(1) then
+		elseif btnp(➡️) then
 			splash_selected_level = clamp( splash_selected_level + 1, 0, #levels )
-		elseif btnp(4) then
+		elseif btnp(❎) then
 			if splash_selected_level == 0 then
 				current_session = session_init( MODE_ALL_LEVELS )
 			else
@@ -274,7 +274,7 @@ function _update60()
 	elseif page == PAGE_SESSION then
 		session_update( current_session )
 	elseif page == PAGE_SUCCESS then
-		if btnp(4) or btnp(5) then
+		if btnp(❎) or btnp(🅾️) then
 			if current_session.mode == MODE_ALL_LEVELS then
 				if current_session.level == #levels and ( not current_session.record or current_session.frames < current_session.record ) then
 					dset( ALL_LEVELS_SCORE_SLOT, current_session.frames )
@@ -286,10 +286,10 @@ function _update60()
 			end
 		end
 
-		if btnp(5) then
+		if btnp(🅾️) then
 			next_page = PAGE_SPLASH
 			splash_level_records = nil
-		elseif btnp(4) then
+		elseif btnp(❎) then
 			if current_session.mode == MODE_ALL_LEVELS then
 				if current_session.level + 1 > #levels then
 					next_page = PAGE_SPLASH
@@ -304,26 +304,26 @@ function _update60()
 			end
 		end
 	elseif page == PAGE_FAIL then
-		if btnp(4) then
+		if btnp(❎) then
 			if current_session.mode == MODE_ALL_LEVELS then
 				current_session = session_init( current_session.mode, current_session.level, current_session.frames )
 			else
 				current_session = session_init( current_session.mode, current_session.level )
 			end
 			next_page = PAGE_SESSION
-		elseif btnp(5) then
+		elseif btnp(🅾️) then
 			next_page = PAGE_SPLASH
 			splash_level_records = nil
 		end
 	elseif page == PAGE_REPEAT then
-		if btnp(4) then
+		if btnp(❎) then
 			if current_session.mode == MODE_ALL_LEVELS then
 				current_session = session_init( current_session.mode, current_session.level, current_session.frames )
 			else
 				current_session = session_init( current_session.mode, current_session.level )
 			end
 			next_page = PAGE_SESSION
-		elseif btnp(5) then
+		elseif btnp(🅾️) then
 			next_page = PAGE_SPLASH
 			splash_level_records = nil
 		end
@@ -361,9 +361,9 @@ function _draw()
 		print( '' )
 		
 		if current_session.mode == MODE_SINGLE_LEVEL or ( current_session.mode == MODE_ALL_LEVELS and current_session.level == #levels ) then
-			print( '   your time is ' .. format_time( current_session.frames ) )
+			print( '      your time is ' .. format_time( current_session.frames ) )
 			if not current_session.record or current_session.frames < current_session.record then
-				print( '   new record!' )
+				print( '          new record!' )
 			else
 				print( '   record is ' .. format_time( current_session.record ) )
 			end
