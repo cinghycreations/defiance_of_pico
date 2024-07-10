@@ -260,10 +260,13 @@ end
 
 function _update60()
 	if next_page ~= nil then
-		if next_page == PAGE_SPLASH or next_page == PAGE_RECORDS then
-			music( 0 )
-		else
+		if next_page == PAGE_SPLASH then
+			if page ~= PAGE_RECORDS then
+				music( 0 )
+			end
+		elseif next_page == PAGE_SESSION or next_page == PAGE_SUCCESS or next_page == PAGE_FAIL or next_page == PAGE_REPEAT then
 			music( -1 )
+		elseif next_page == PAGE_RECORDS then
 		end
 	end
 
