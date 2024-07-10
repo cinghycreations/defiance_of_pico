@@ -1,4 +1,4 @@
-local BUILD_VERSION = '0.3'
+local BUILD_VERSION = '1.0'
 
 local TILE_EMPTY = 0
 local TILE_CROWN = 3
