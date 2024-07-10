@@ -4,6 +4,12 @@ local TILE_SHELF = 1
 local TILE_BOOSTER = 2
 local TILE_SPIKES = 4
 
+local SFX_JUMP = 10
+local SFX_JUMP_TRAMPOLINE = 11
+local SFX_COLLECT_CROWN = 12
+local SFX_SPIKE = 13
+local SFX_WIN = 14
+
 local PAGE_SPLASH = 0
 local PAGE_RECORDS = 5
 local PAGE_SESSION = 1
@@ -122,6 +128,7 @@ local function session_update(session)
 		if crown_tile == TILE_CROWN then
 			session.crowns_left = session.crowns_left - 1
 			mset( crown_cell[1], crown_cell[2], TILE_EMPTY )
+			sfx( SFX_COLLECT_CROWN )
 		end
 	end
 
@@ -134,9 +141,11 @@ local function session_update(session)
 			if ground_tile == TILE_SHELF or ground_cell[2] == 31 then
 				session.ball_position[2] = ground_cell[2] * 8 - 4
 				session.ball_speed = session.ball_impulse
+				sfx( SFX_JUMP )
 			elseif ground_tile == TILE_BOOSTER then
 				session.ball_position[2] = ground_cell[2] * 8 - 4
 				session.ball_speed = session.ball_booster_impulse
+				sfx( SFX_JUMP_TRAMPOLINE )
 			end
 		end
 	end
@@ -144,6 +153,7 @@ local function session_update(session)
 	-- success
 	if session.crowns_left == 0 then
 		next_page = PAGE_SUCCESS
+		sfx( SFX_WIN )
 		return
 	end
 
@@ -153,6 +163,7 @@ local function session_update(session)
 		center_tile = mget( center_cell[1], center_cell[2] )
 		if center_tile == TILE_SPIKES then
 			next_page = PAGE_FAIL
+			sfx( SFX_SPIKE )
 			return
 		end
 	end
@@ -235,6 +246,7 @@ end
 function _init()
 	cartdata( 'defiance_of_pico_' .. 'v0-1')
 
+	music( 0 )
 	if dbg.start_level ~= nil then
 		current_session = session_init( MODE_SINGLE_LEVEL, dbg.start_level )
 		page = PAGE_SESSION
@@ -247,6 +259,14 @@ function _init()
 end
 
 function _update60()
+	if next_page ~= nil then
+		if next_page == PAGE_SPLASH or next_page == PAGE_RECORDS then
+			music( 0 )
+		else
+			music( -1 )
+		end
+	end
+
 	page = next_page or page
 	next_page = nil
 
