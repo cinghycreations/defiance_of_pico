@@ -1,3 +1,5 @@
+local BUILD_VERSION = '0.3'
+
 local TILE_EMPTY = 0
 local TILE_CROWN = 3
 local TILE_SHELF = 1
@@ -360,7 +362,7 @@ function _draw()
 	if page == PAGE_SPLASH then
 		cls()
 		map( 48, 0, 0, 0, 16, 16 )
-		cursor( 0, 12 * 5 )
+		cursor( 0, 11 * 6 )
 		if splash_selected_level == 0 then
 			print( '     ⬅️ full playthrough ➡️' )
 		else
@@ -369,22 +371,21 @@ function _draw()
 		print( '' )
 		print( '        press ❎ to play' )
 		print( '    press 🅾️ to show records' )
-		print( '' )
-		print( '' )
-		print( '' )
-		print( '' )
+		cursor( 0, 19 * 6 )
 		print( '   a game by cinghy creations   ' )
-		print( 'sfx by gruber  music by snabisch' )
+		print( 'sfx by gruber  music by snabisch\0' )
 	elseif page == PAGE_RECORDS then
 		cls()
 		map( 48, 0, 0, 0, 16, 16 )
-		cursor( 0, 7 * 8 )
+		cursor( 0, 8 * 6 )
 		for level = 1, #levels do
 			print( '       level ' .. level .. '     ' .. format_time( records_page_data[level] ) )
 		end
 		print( '  full playthrough ' .. format_time( records_page_data[ALL_LEVELS_SCORE_SLOT] ) )
 		print( '' )
 		print( '       press 🅾️ to go back' )
+		cursor( 0, 20 * 6 )
+		print( 'v' .. BUILD_VERSION .. '\0' )
 	elseif page == PAGE_SESSION then
 		session_draw( current_session )
 	elseif page == PAGE_SUCCESS then
