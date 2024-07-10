@@ -360,7 +360,7 @@ function _draw()
 	if page == PAGE_SPLASH then
 		cls()
 		map( 48, 0, 0, 0, 16, 16 )
-		cursor( 0, 12 * 8 )
+		cursor( 0, 12 * 5 )
 		if splash_selected_level == 0 then
 			print( '     ⬅️ full playthrough ➡️' )
 		else
@@ -369,6 +369,12 @@ function _draw()
 		print( '' )
 		print( '        press ❎ to play' )
 		print( '    press 🅾️ to show records' )
+		print( '' )
+		print( '' )
+		print( '' )
+		print( '' )
+		print( '   a game by cinghy creations   ' )
+		print( 'sfx by gruber  music by snabisch' )
 	elseif page == PAGE_RECORDS then
 		cls()
 		map( 48, 0, 0, 0, 16, 16 )
