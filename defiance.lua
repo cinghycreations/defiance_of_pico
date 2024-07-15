@@ -117,7 +117,7 @@ local function session_update(session)
 
 	-- ball gravity
 	session.ball_position[1] = session.platform_offset
-	session.ball_speed = session.ball_speed + session.ball_gravity * elapsed_time
+	session.ball_speed = clamp( session.ball_speed + session.ball_gravity * elapsed_time, -7.9, 7.9 )
 	session.ball_position[2] = session.ball_position[2] + session.ball_speed
 
 	-- collisions
