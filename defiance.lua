@@ -23,6 +23,7 @@ local MODE_ALL_LEVELS = 0
 local MODE_SINGLE_LEVEL = 1
 
 local ALL_LEVELS_SCORE_SLOT = 0
+local MAX_TIME = 30008
 
 local page = nil
 local next_page = nil
@@ -109,6 +110,9 @@ local function session_update(session)
 
 	-- frames
 	session.frames = session.frames + 1
+	if session.frames >= MAX_TIME then
+		session.frames = MAX_TIME
+	end
 
 	-- platform
 	if btn(⬅️) then session.platform_offset = session.platform_offset - session.platform_speed end
@@ -178,8 +182,8 @@ local function format_time(frames)
 
 	local time = frames * (1 / 60)
 
-	if time >= 1000 then
-		return '999.999'
+	if frames >= MAX_TIME then
+		return '500.000'
 	end
 
 	secs = flr(time)
